@@ -4,12 +4,60 @@ import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 )
 
+type timerInterface interface {
+	float32
+	float32
+	GetStatus() bool
+	Init(float32)
+}
+
+type timer struct {
+	lifeTime float32
+	initTime float32
+}
+
+type repeater struct {
+	lifeTime float32
+	initTime float32
+}
+
+func (t *timer) Init(lifeTime float32) {
+	t.initTime = float32(rl.GetTime())
+	t.lifeTime = lifeTime
+}	
+
+func (r *repeater) Init(lifeTime float32) {
+	r.initTime = float32(rl.GetTime())
+	r.lifeTime = lifeTime
+}	
+
+func (t *timer) GetStatus() bool {
+	if float32(rl.GetTime()) - t.initTime > t.lifeTime {
+		return true
+	}
+	return false
+}
+
+func (r *repeater) GetStatus() bool {
+	if float32(rl.GetTime()) - r.initTime > r.lifeTime {
+		r.initTime = float32(rl.GetTime())
+		return true
+	}
+	return false
+}
+
 const (
 	screenWidth int32 = 1000
 	screenHeight int32 = 480
+
+	FPS int32 = 60
 )
 
 var (
+	dt float32 = rl.GetFrameTime()
+	animTimer repeater = repeater{}
+	animFrame bool
+
 	running bool = true
 	bkgColor rl.Color = rl.NewColor(147, 211, 196, 255)
 
@@ -23,7 +71,7 @@ var (
 	playerUp, playerDown, playerRight, playerLeft bool
 	playerFrame int
 
-	playerSpeed float32 = 3
+	playerSpeed float32 = 150
 
 	frameCount int
 
@@ -32,7 +80,6 @@ var (
 
 	cam rl.Camera2D
 )
-
 
 func drawScene() {
 	rl.DrawTexture(grassSprite, 100, 50, rl.White)
@@ -67,33 +114,36 @@ func input() {
 
 func update() {
 	running = !rl.WindowShouldClose()
-
-	playerSrc.X = 0
+	dt = rl.GetFrameTime()
+	animFrame = animTimer.GetStatus()
 
 	if playerMoving {
 		if playerUp {
-			playerDest.Y -= playerSpeed
+			playerDest.Y -= playerSpeed * dt
 		}
 		if playerDown {
-			playerDest.Y += playerSpeed
+			playerDest.Y += playerSpeed * dt
 		}
 		if playerRight {
-			playerDest.X += playerSpeed
+			playerDest.X += playerSpeed * dt
 		}
 		if playerLeft {
-			playerDest.X -= playerSpeed
+			playerDest.X -= playerSpeed * dt
 		}
 
-		if frameCount % 8 == 0 {
-			playerFrame++
-		}
-		playerSrc.X = playerSrc.Width * float32(playerFrame)
+	} 
+	if animFrame {
+		playerFrame++
 	}
 	frameCount++
 	if playerFrame > 3 {
 		playerFrame = 0
 	}	
+	if !playerMoving && playerFrame > 1 {
+		playerFrame = 0
+	}
 
+	playerSrc.X = playerSrc.Width * float32(playerFrame)
 	playerSrc.Y = playerSrc.Height * float32(playerDir)
 	
 	rl.UpdateMusicStream(music)
@@ -126,7 +176,9 @@ func render() {
 func init() {
 	rl.InitWindow(screenWidth, screenHeight, "raylib-learn-go")
 	rl.SetExitKey(0)
-	rl.SetTargetFPS(60)
+	rl.SetTargetFPS(FPS)
+
+	animTimer.Init(.5)
 
 	grassSprite = rl.LoadTexture("res/tilesets/grass.png")
 	playerSprite = rl.LoadTexture("res/characters/character-spritesheet.png")
