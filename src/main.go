@@ -2,49 +2,9 @@ package main
 
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
+	"github.com/chasenut/raylib-learn/src/timer"
 )
 
-type timerInterface interface {
-	float32
-	float32
-	GetStatus() bool
-	Init(float32)
-}
-
-type timer struct {
-	lifeTime float32
-	initTime float32
-}
-
-type repeater struct {
-	lifeTime float32
-	initTime float32
-}
-
-func (t *timer) Init(lifeTime float32) {
-	t.initTime = float32(rl.GetTime())
-	t.lifeTime = lifeTime
-}	
-
-func (r *repeater) Init(lifeTime float32) {
-	r.initTime = float32(rl.GetTime())
-	r.lifeTime = lifeTime
-}	
-
-func (t *timer) GetStatus() bool {
-	if float32(rl.GetTime()) - t.initTime > t.lifeTime {
-		return true
-	}
-	return false
-}
-
-func (r *repeater) GetStatus() bool {
-	if float32(rl.GetTime()) - r.initTime > r.lifeTime {
-		r.initTime = float32(rl.GetTime())
-		return true
-	}
-	return false
-}
 
 const (
 	screenWidth int32 = 1000
@@ -55,7 +15,7 @@ const (
 
 var (
 	dt float32 = rl.GetFrameTime()
-	animTimer repeater = repeater{}
+	animTimer timer.Repeater = timer.Repeater{}
 	animFrame bool
 
 	running bool = true
