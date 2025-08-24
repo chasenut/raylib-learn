@@ -42,17 +42,39 @@ func NewTextSimple(content string,
 		FontSize: fontSize,
 		Color: color,
 		Font: font,
-		Spacing: 0,
+		Spacing: 4,
 	}
 }
 
 type Button struct {
-	active bool
-	Toogle bool
 	Rect rl.Rectangle
 	ColorEnabled rl.Color
 	ColorDisabled rl.Color
 	Text Text
+	Toogle bool
+	Active bool
+}
+
+func NewButton(rect rl.Rectangle,
+	colorEnabled, colorDisabled rl.Color,
+	text Text,
+	toogle, active bool) Button {
+	return Button{
+		Rect: rect,
+		ColorEnabled: colorEnabled,
+		ColorDisabled: colorDisabled,
+		Text: text,
+		Toogle: toogle,
+		Active: active,
+	}
+}
+
+func (b *Button) SetText(text Text) {
+	b.Text = text
+}
+
+func (b *Button) SetTextContent(text string) {
+	b.Text.Content = text
 }
 
 type FixedButton struct {
@@ -66,18 +88,12 @@ type StaticButton struct {
 
 var (
 	DefaultFont rl.Font = rl.GetFontDefault()
+	PresetTextEmpty Text = NewTextSimple("", 0, 0, 0, rl.White)
+	PresetTextHelloWorld Text = NewTextSimple("Hello, world", 0, 0, 20, rl.White)
 )
 
-func (b Button) GetStatus() bool {
-	return b.active
-}
-
-func (b *Button) SetStatus(status bool) {
-	b.active = status
-}
-
 func (b Button) Draw() {
-	if b.active {
+	if b.Active {
 		rl.DrawRectangleRec(b.Rect, b.ColorEnabled)
 	} else {
 		rl.DrawRectangleRec(b.Rect, b.ColorDisabled)

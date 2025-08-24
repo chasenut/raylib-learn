@@ -3,6 +3,7 @@ package main
 import (
 	rl "github.com/gen2brain/raylib-go/raylib"
 	"github.com/chasenut/raylib-learn/src/timer"
+	"github.com/chasenut/raylib-learn/src/resp"
 )
 
 
@@ -39,11 +40,21 @@ var (
 	music rl.Music
 
 	cam rl.Camera2D
+
+	sBtnRect rl.Rectangle = rl.NewRectangle(0, 0, 200, 50)
+	Btn resp.Button = resp.NewButton(sBtnRect, rl.Green, rl.Red, 
+		resp.PresetTextHelloWorld, 
+		true, false)
+	sBtn resp.StaticButton = resp.StaticButton{
+		Button: Btn,
+	}
 )
 
 func drawScene() {
 	rl.DrawTexture(grassSprite, 100, 50, rl.White)
 	rl.DrawTexturePro(playerSprite, playerSrc, playerDest, rl.NewVector2(playerDest.Width, playerDest.Height), 0, rl.White)
+	sBtn.Draw()
+
 }
 
 func input() {
